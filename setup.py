@@ -12,7 +12,7 @@ setup(
     description="A wrapper for the Terraform CLI that provides a formatted plan summary.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/henryupton/terraformat",
+    url="https://github.com/henryupton/terraformat", # Change this
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
