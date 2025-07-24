@@ -103,6 +103,8 @@ def parse_plan_output(plan_output):
     summary = defaultdict(lambda: {a: 0 for a in ACTIONS.keys()})
 
     for line in plan_output.splitlines():
+        if not line.strip().startswith("#"):
+            continue
         match = pattern.search(line)
         if match:
             address_string, action = match.groups()

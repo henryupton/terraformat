@@ -1,9 +1,8 @@
-# terraformat/address.py
-import re
-
-
 class TerraformResourceAddress:
-    # ... __init__ remains the same ...
+    SPECIAL_VALUES = {
+        ".": "{{ DOT }}"
+    }
+
     def __init__(self, address_string):
         self.full_address = address_string
 
@@ -14,15 +13,37 @@ class TerraformResourceAddress:
 
         self._parse()
 
-    @staticmethod
-    def _parse_key(key_str):
-        key_str_reversed = key_str[::-1]
+    def _escape_dynamic_keys(self, address):
+        """
+        Escapes dots which are allowed in keys but will upset the parser.
+        """
+        is_key = False
+        for i, char in enumerate(address):
+            if char == '"':
+                is_key = not is_key
 
-        key_value = ""
+            if is_key and char in self.SPECIAL_VALUES:
+                address = address[:i] + self.SPECIAL_VALUES[char] + address[i + 1:]
+
+        return address
+
+    def _reencode_dynamic_keys(self, address):
+        """
+        Replaces special values in the address with their original characters.
+        """
+        for key, value in self.SPECIAL_VALUES.items():
+            address = address.replace(value, key)
+        return address
+
+    @staticmethod
+    def _parse_key_from_address(address):
+        address_reversed = address[::-1]
+
+        value = ""
         is_key = False
         start_index = 0
         end_index = 0
-        for i, char in enumerate(key_str_reversed):
+        for i, char in enumerate(address_reversed):
             if char == '[':
                 start_index = i
                 break
@@ -33,9 +54,9 @@ class TerraformResourceAddress:
                 continue
 
             if is_key:
-                key_value += char
+                value += char
 
-        return key_value[::-1].strip().strip('"'), start_index, end_index
+        return value[::-1].strip().strip('"'), start_index, end_index
 
     def _parse(self):
         """
@@ -44,8 +65,8 @@ class TerraformResourceAddress:
         address = self.full_address
 
         # 1. Check if the address contains a key (e.g., "module.vpc.aws_subnet.public[0]")
-        key, start, end = self._parse_key(address)
-        if key:
+        key, start, end = self._parse_key_from_address(address)
+        if key and address.endswith(']'):  # Only want keys which are at the end.
             try:
                 self.key = int(key)  # Try to convert to an integer if possible
             except ValueError:
@@ -53,9 +74,9 @@ class TerraformResourceAddress:
             address = address[:len(address) - start - 1]
 
         # 2. Split the address into parts.
+        address = self._escape_dynamic_keys(address)
         parts = address.split('.')
-        if len(parts) < 2:
-            raise ValueError("Must contain at least a type and a name")
+        parts = [self._reencode_dynamic_keys(part) for part in parts]
 
         self.name = parts.pop(-1)
         self.type = parts.pop(-1)

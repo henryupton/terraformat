@@ -8,11 +8,11 @@ setup(
     name="terraformat",
     version="0.1.0",
     author="Henry Upton-Birdsall",
-    author_email="your.email@example.com",
+    author_email="henryupton@gmail.com",
     description="A wrapper for the Terraform CLI that provides a formatted plan summary.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/henryupton/terraformat", # Change this
+    url="https://github.com/henryupton/terraformat",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
