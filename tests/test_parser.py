@@ -3,7 +3,7 @@ import json
 
 import pytest
 from collections import defaultdict
-from terraformat.main import parse_plan_output
+from terraformat.main import parse_output
 
 # --- Test Data: Mock Terraform Plan Outputs ---
 
@@ -50,7 +50,7 @@ and found no differences, so no changes are needed.
 
 def test_parse_plan_with_mixed_actions():
     """Tests a typical plan with create, update, and destroy actions."""
-    summary, totals = parse_plan_output(PLAN_MIXED_ACTIONS)
+    summary, totals = parse_output(PLAN_MIXED_ACTIONS)
 
     print(json.dumps(summary, indent=2))
 
@@ -69,7 +69,7 @@ def test_parse_plan_with_mixed_actions():
 
 def test_parse_plan_with_no_changes():
     """Tests a plan where no changes are detected."""
-    summary, totals = parse_plan_output(PLAN_NO_CHANGES)
+    summary, totals = parse_output(PLAN_NO_CHANGES)
 
     # Both the summary and totals should be empty/zero
     assert not summary
@@ -78,7 +78,7 @@ def test_parse_plan_with_no_changes():
 
 def test_parse_empty_input():
     """Ensures the parser handles empty string input gracefully."""
-    summary, totals = parse_plan_output("")
+    summary, totals = parse_output("")
 
     assert not summary
     assert totals == {'create': 0, 'update': 0, 'destroy': 0}

@@ -21,6 +21,13 @@ ACTIONS = {
         'will': 'will be updated in-place',
         'to': 'to change'
     },
+    'replace': {
+        'color': 'amber',
+        'symbol': '↻',
+        'will': 'will be replaced',
+        'to': 'to replace',
+        'include_in_summary': False  # This action is not included in the summary table as it's actually a combination of create and destroy.
+    },
     'destroy': {
         'color': 'red',
         'symbol': '-',
@@ -43,7 +50,7 @@ def cli(args):
     # This function remains unchanged...
     command = args[0] if args else None
 
-    if command == 'plan':
+    if command in ['plan', 'apply', 'destroy']:
         run_terraform_plan(args)
     else:
         try:
@@ -60,7 +67,7 @@ def run_terraform_plan(args):
     Executes 'terraform plan', captures the output, and displays a summary.
     """
     # This function remains unchanged...
-    click.echo("🚀 Running 'terraform plan'...")
+    click.echo(f"🚀 Running 'terraform {' '.join(args)}'...")
     try:
         # We use '-no-color' to get clean text output that's easy to parse.
         process = subprocess.run(
@@ -82,7 +89,7 @@ def run_terraform_plan(args):
         click.echo("📊 Terraformat Summary")
         click.echo("=" * 50)
 
-        summary, totals = parse_plan_output(process.stdout)
+        summary, totals = parse_output(process.stdout)
         display_summary(summary, totals)
 
         # Exit with the original terraform exit code
@@ -93,12 +100,11 @@ def run_terraform_plan(args):
         sys.exit(1)
 
 
-def parse_plan_output(plan_output):
+def parse_output(plan_output):
     """
     Parses the text output of a terraform plan using TerraformResourceAddress.
     """
-    # This function remains unchanged...
-    pattern = re.compile(r"# (.+) will be (created|updated in-place|destroyed)")
+    pattern = re.compile(r"# (.+) (will be created|will be updated in-place|will be destroyed|must be replaced)")
 
     summary = defaultdict(lambda: {a: 0 for a in ACTIONS.keys()})
 
@@ -116,11 +122,14 @@ def parse_plan_output(plan_output):
 
             resource_type = resource.type
 
-            if action == 'created':
+            if action == 'will be created':
                 summary[resource_type]['create'] += 1
-            elif action == 'updated in-place':
+            elif action == 'will be updated in-place':
                 summary[resource_type]['update'] += 1
-            elif action == 'destroyed':
+            elif action == 'will be destroyed':
+                summary[resource_type]['destroy'] += 1
+            elif action == 'must be replaced':
+                summary[resource_type]['create'] += 1
                 summary[resource_type]['destroy'] += 1
 
     totals = {"create": 0, "update": 0, "destroy": 0}
@@ -155,13 +164,19 @@ def display_summary(summary, totals):
     for resource_type, counts in sorted(summary.items()):
         table_data.append([
             resource_type,
-            *[color_if_nonzero(counts[action], action_meta["color"]) for action, action_meta in ACTIONS.items()],
+            *[
+                color_if_nonzero(counts[action], action_meta["color"]) for action, action_meta in ACTIONS.items()
+                if action_meta.get("include_in_summary", True)
+            ],
         ])
 
     # Add the totals row
     table_data.append([
         "Total",
-        *[color_if_nonzero(totals[action], action_meta["color"]) for action, action_meta in ACTIONS.items()],
+        *[
+            color_if_nonzero(totals[action], action_meta["color"]) for action, action_meta in ACTIONS.items()
+            if action_meta.get("include_in_summary", True)
+        ],
     ])
 
     # Generate and print the table
