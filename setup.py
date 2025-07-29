@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="terraformat",
-    version="0.1.0",
+    version="0.1.4",
     author="Henry Upton-Birdsall",
     author_email="henryupton@gmail.com",
     description="A wrapper for the Terraform CLI that provides a formatted plan summary.",
