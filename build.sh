@@ -24,8 +24,7 @@ VERSION=$1
 # --- 2. Update version in files ---
 echo "Updating version to $VERSION..."
 # For macOS (uses -i '' to avoid creating a backup file)
-sed -i '' "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" monochromatic/__init__.py
-sed -i '' "s/version='.*'/version='$VERSION'/" setup.py
+sed -i '' "s/version=\".*\"/version=\"$VERSION\"/" setup.py
 
 # For Linux (GNU sed), the command would be:
 # sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" monochromatic/__init__.py
@@ -45,7 +44,7 @@ twine upload dist/*
 
 # --- 5. Commit and tag in Git ---
 echo "Committing and tagging version in Git..."
-git add monochromatic/__init__.py setup.py
+git add setup.py
 git commit -m "Bump version to $VERSION"
 git tag "v$VERSION"
 git push && git push --tags
