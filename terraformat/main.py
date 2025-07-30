@@ -54,6 +54,8 @@ def cli(args):
         run_terraform_plan(args)
     else:
         try:
+            # click.echo(f'Running terraformat=={__version__}...')
+            click.echo(f"🚀 Running 'terraform {' '.join(args)}'...")
             subprocess.run(['terraform'] + list(args), check=True)
         except subprocess.CalledProcessError as e:
             sys.exit(e.returncode)
@@ -61,17 +63,29 @@ def cli(args):
             click.echo("Error: 'terraform' executable not found. Is Terraform installed and in your PATH?")
             sys.exit(1)
 
+def strip(text: str) -> str:
+    """
+    Removes ANSI escape codes from a string.
+
+    Args:
+        text: The string to be stripped of ANSI codes.
+
+    Returns:
+        The cleaned string without ANSI codes.
+    """
+    # The regular expression for matching ANSI color codes.
+    ansi_escape_pattern = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape_pattern.sub('', text)
+
 
 def run_terraform_plan(args):
     """
     Executes 'terraform plan', captures the output, and displays a summary.
     """
-    # This function remains unchanged...
-    click.echo(f"🚀 Running 'terraform {' '.join(args)}'...")
     try:
         # We use '-no-color' to get clean text output that's easy to parse.
         process = subprocess.run(
-            ['terraform'] + list(args) + ['-no-color'],
+            ['terraform'] + list(args),
             capture_output=True,
             text=True,
             check=False  # We check the return code manually
@@ -89,7 +103,8 @@ def run_terraform_plan(args):
         click.echo("📊 Terraformat Summary")
         click.echo("=" * 50)
 
-        summary, totals = parse_output(process.stdout)
+        no_color_output = strip(process.stdout)
+        summary, totals = parse_output(no_color_output)
         display_summary(summary, totals)
 
         # Exit with the original terraform exit code
@@ -106,7 +121,7 @@ def parse_output(plan_output):
     """
     pattern = re.compile(r"# (.+) (will be created|will be updated in-place|will be destroyed|must be replaced)")
 
-    summary = defaultdict(lambda: {a: 0 for a in ACTIONS.keys()})
+    summary = defaultdict(lambda: {a: 0 for a, m in ACTIONS.items() if m.get('include_in_summary', True)})
 
     for line in plan_output.splitlines():
         if not line.strip().startswith("#"):
@@ -157,7 +172,7 @@ def display_summary(summary, totals):
         click.echo("No changes. Your infrastructure matches the configuration.")
         return
 
-    headers = ["Resource Type", *[action.title() for action in ACTIONS.keys()]]
+    headers = ["Resource Type", *[action.title() for action, meta in ACTIONS.items() if meta.get('include_in_summary', True)]]
     table_data = []
 
     # Prepare table rows

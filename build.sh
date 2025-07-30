@@ -27,7 +27,7 @@ echo "Updating version to $VERSION..."
 sed -i '' "s/version=\".*\"/version=\"$VERSION\"/" setup.py
 
 # For Linux (GNU sed), the command would be:
-# sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" monochromatic/__init__.py
+# sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" terraformat/__init__.py
 # sed -i "s/version='.*'/version='$VERSION'/" setup.py
 
 
