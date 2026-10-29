@@ -99,7 +99,7 @@ import terraformat
 plan = terraformat.load(Path("hcp-run.log").read_text())
 
 plan.counts[terraformat.Op.MOVE]  # 3
-plan.has_changes                  # True, even when only moving
+plan.has_changes  # True, even when only moving
 print(terraformat.to_markdown(plan))
 ```
 
