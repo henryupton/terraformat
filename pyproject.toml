@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "terraformat"
+version = "1.0.0"
+description = "Read Terraform plan output (plan JSON, the -json stream or plain text) and render it as a table, markdown or JSON."
+readme = "README.md"
+license = "Unlicense"
+license-files = ["LICENSE"]
+authors = [{ name = "Henry Upton-Birdsall", email = "henryupton@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = ["click>=8.1"]
+keywords = ["terraform", "plan", "hcp", "ci", "markdown"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Homepage = "https://github.com/henryupton/terraformat"
+Issues = "https://github.com/henryupton/terraformat/issues"
+
+[project.scripts]
+terraformat = "terraformat.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.hatch.build.targets.sdist]
+include = ["terraformat", "tests", "README.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# `×` in counts is deliberate.
+ignore = ["RUF001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

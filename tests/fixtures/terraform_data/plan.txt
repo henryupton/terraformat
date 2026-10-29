@@ -1,0 +1,76 @@
+terraform_data.new_name: Refreshing state... [id=bd662548-3389-6a42-d65d-9ee5c7813430]
+terraform_data.keep: Refreshing state... [id=1395cd72-c3b0-6fdd-74a6-79d98fcc95fd]
+terraform_data.gone: Refreshing state... [id=6cf8bc07-0c0e-5a2b-a5a2-bee71d9332c8]
+terraform_data.swap: Refreshing state... [id=654ffdaf-6567-98bc-de9c-7dbb2bcdf60f]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+  - destroy
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+ # terraform_data.forget_me will no longer be managed by Terraform, but will not be destroyed
+ # (destroy = false is set in the configuration)
+ . resource "terraform_data" "forget_me" {
+        id     = "6aeea648-e820-48ec-477d-b4249e042747"
+        # (2 unchanged attributes hidden)
+    }
+
+  # terraform_data.fresh will be created
+  + resource "terraform_data" "fresh" {
+      + id     = (known after apply)
+      + input  = "n"
+      + output = (known after apply)
+    }
+
+  # terraform_data.gone will be destroyed
+  # (because terraform_data.gone is not in configuration)
+  - resource "terraform_data" "gone" {
+      - id     = "6cf8bc07-0c0e-5a2b-a5a2-bee71d9332c8" -> null
+      - input  = "g" -> null
+      - output = "g" -> null
+    }
+
+  # terraform_data.keep will be updated in-place
+  ~ resource "terraform_data" "keep" {
+        id     = "1395cd72-c3b0-6fdd-74a6-79d98fcc95fd"
+      ~ input  = "a" -> "b"
+      ~ output = "a" -> (known after apply)
+    }
+
+  # terraform_data.old_name has moved to terraform_data.new_name
+    resource "terraform_data" "new_name" {
+        id     = "bd662548-3389-6a42-d65d-9ee5c7813430"
+        # (2 unchanged attributes hidden)
+    }
+
+  # terraform_data.swap must be replaced
+-/+ resource "terraform_data" "swap" {
+      ~ id               = "654ffdaf-6567-98bc-de9c-7dbb2bcdf60f" -> (known after apply)
+      ~ output           = "s" -> (known after apply)
+      ~ triggers_replace = [
+          ~ "1" -> "2",
+        ]
+        # (1 unchanged attribute hidden)
+    }
+
+Plan: 2 to add, 1 to change, 2 to destroy.
+
+Warning: Some objects will no longer be managed by Terraform
+
+If you apply this plan, Terraform will discard its tracking information for
+the following objects, but it will not delete them:
+ - terraform_data.forget_me
+
+After applying this plan, Terraform will no longer manage these objects. You
+will need to import them into Terraform to manage them again.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: v2.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "v2.tfplan"
